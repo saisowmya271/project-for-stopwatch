@@ -1,0 +1,197 @@
+PROJECT FOR STOP WATCH
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Modern Stopwatch</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+  body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    font-family: 'Orbitron', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 3rem;
+    text-shadow: 0 0 10px rgba(0,0,0,0.3);
+  }
+
+  .stopwatch {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    padding: 40px 50px;
+    text-align: center;
+    min-width: 320px;
+    max-width: 400px;
+  }
+
+  .time-display {
+    font-size: 4rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 30px;
+    user-select: none;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  button {
+    flex: 1;
+    padding: 15px 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  button:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  #start-btn {
+    background: #28a745;
+  }
+
+  #start-btn:hover {
+    background: #1e7e34;
+  }
+
+  #stop-btn {
+    background: #dc3545;
+  }
+
+  #stop-btn:hover {
+    background: #a71d2a;
+  }
+
+  #reset-btn {
+    background: #ffc107;
+    color: #212529;
+  }
+
+  #reset-btn:hover {
+    background: #e0a800;
+  }
+
+  @media (max-width: 400px) {
+    .stopwatch {
+      padding: 30px 20px;
+      min-width: auto;
+      max-width: 100%;
+    }
+    .time-display {
+      font-size: 3rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Stopwatch</h1>
+  <div class="stopwatch" role="region" aria-label="Stopwatch timer">
+    <div class="time-display" id="time-display" aria-live="polite" aria-atomic="true">00:00.000</div>
+    <div class="buttons">
+      <button id="start-btn" aria-pressed="false">Start</button>
+      <button id="stop-btn" aria-pressed="false" disabled>Stop</button>
+      <button id="reset-btn" aria-pressed="false" disabled>Reset</button>
+    </div>
+  </div>
+
+<script>
+  (() => {
+    const timeDisplay = document.getElementById('time-display');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval = null;
+
+    function timeToString(time) {
+      const date = new Date(time);
+      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+      const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+      const milliseconds = date.getUTCMilliseconds().toString().padStart(3, '0');
+      return `${minutes}:${seconds}.${milliseconds}`;
+    }
+
+    function printTime() {
+      timeDisplay.textContent = timeToString(elapsedTime);
+    }
+
+    function start() {
+      if (timerInterval) return; // already running
+      startTime = Date.now() - elapsedTime;
+      timerInterval = setInterval(() => {
+        elapsedTime = Date.now() - startTime;
+        printTime();
+      }, 31); // roughly update every frame (~30 FPS)
+      startBtn.disabled = true;
+      startBtn.setAttribute('aria-pressed', 'true');
+      stopBtn.disabled = false;
+      stopBtn.setAttribute('aria-pressed', 'false');
+      resetBtn.disabled = false;
+      resetBtn.setAttribute('aria-pressed', 'false');
+    }
+
+    function stop() {
+      if (!timerInterval) return; // already stopped
+      clearInterval(timerInterval);
+      timerInterval = null;
+      startBtn.disabled = false;
+      startBtn.setAttribute('aria-pressed', 'false');
+      stopBtn.disabled = true;
+      stopBtn.setAttribute('aria-pressed', 'true');
+    }
+
+    function reset() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      elapsedTime = 0;
+      printTime();
+      startBtn.disabled = false;
+      startBtn.setAttribute('aria-pressed', 'false');
+      stopBtn.disabled = true;
+      stopBtn.setAttribute('aria-pressed', 'false');
+      resetBtn.disabled = true;
+      resetBtn.setAttribute('aria-pressed', 'true');
+    }
+
+    // Initialize buttons states
+    resetBtn.disabled = true;
+    stopBtn.disabled = true;
+
+    startBtn.addEventListener('click', start);
+    stopBtn.addEventListener('click', stop);
+    resetBtn.addEventListener('click', reset);
+
+    // Initialize display
+    printTime();
+  })();
+</script>
+</body>
+</html>
+
